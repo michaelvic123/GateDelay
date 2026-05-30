@@ -20,7 +20,11 @@ contract RulingTimelock {
 
     mapping(bytes32 => Ruling) private _rulings;
 
-    event RulingScheduled(bytes32 indexed id, address indexed target, uint256 unlockTime);
+    event RulingScheduled(
+        bytes32 indexed id,
+        address indexed target,
+        uint256 unlockTime
+    );
     event RulingExecuted(bytes32 indexed id);
     event RulingFailed(bytes32 indexed id, bytes failureData);
     event RulingCancelled(bytes32 indexed id);
@@ -35,7 +39,12 @@ contract RulingTimelock {
     }
 
     /// @notice Schedule a ruling to be executed after `delay` seconds.
-    function scheduleRuling(bytes32 id, address target, bytes calldata data, uint256 delay) external onlyOwner {
+    function scheduleRuling(
+        bytes32 id,
+        address target,
+        bytes calldata data,
+        uint256 delay
+    ) external onlyOwner {
         Ruling storage r = _rulings[id];
         require(r.unlockTime == 0, "Already scheduled");
         require(target != address(0), "Invalid target");
@@ -80,19 +89,35 @@ contract RulingTimelock {
     }
 
     /// @notice Query a ruling record.
-    function getRuling(bytes32 id) external view returns (
-        address target,
-        bytes memory data,
-        uint256 unlockTime,
-        uint256 delay,
-        address proposer,
-        bool executed,
-        bool canceled,
-        bool failed,
-        bytes memory failureData
-    ) {
+    function getRuling(
+        bytes32 id
+    )
+        external
+        view
+        returns (
+            address target,
+            bytes memory data,
+            uint256 unlockTime,
+            uint256 delay,
+            address proposer,
+            bool executed,
+            bool canceled,
+            bool failed,
+            bytes memory failureData
+        )
+    {
         Ruling storage r = _rulings[id];
-        return (r.target, r.data, r.unlockTime, r.delay, r.proposer, r.executed, r.canceled, r.failed, r.failureData);
+        return (
+            r.target,
+            r.data,
+            r.unlockTime,
+            r.delay,
+            r.proposer,
+            r.executed,
+            r.canceled,
+            r.failed,
+            r.failureData
+        );
     }
 
     /// @notice Check if a ruling is ready to execute.

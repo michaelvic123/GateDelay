@@ -7,7 +7,12 @@ import "./Resolution.sol";
 /// @notice Processes arbitration verdicts, executes decisions via `Resolution`,
 ///         tracks execution status, and exposes queries for callers.
 contract VerdictExecution {
-    enum ExecStatus { UNKNOWN, PROCESSED, EXECUTED, FAILED }
+    enum ExecStatus {
+        UNKNOWN,
+        PROCESSED,
+        EXECUTED,
+        FAILED
+    }
 
     struct Execution {
         address market;
@@ -24,7 +29,11 @@ contract VerdictExecution {
     Resolution public resolution;
     address public owner;
 
-    event VerdictProcessed(bytes32 indexed verdictId, address indexed market, Resolution.Outcome outcome);
+    event VerdictProcessed(
+        bytes32 indexed verdictId,
+        address indexed market,
+        Resolution.Outcome outcome
+    );
     event ExecutionSucceeded(bytes32 indexed verdictId);
     event ExecutionFailed(bytes32 indexed verdictId, string reason);
 
@@ -52,7 +61,11 @@ contract VerdictExecution {
     /// @param verdictId  Unique identifier for the verdict.
     /// @param market     Target market address.
     /// @param outcome    Final outcome to apply.
-    function processVerdict(bytes32 verdictId, address market, Resolution.Outcome outcome) external onlyArbitrator {
+    function processVerdict(
+        bytes32 verdictId,
+        address market,
+        Resolution.Outcome outcome
+    ) external onlyArbitrator {
         Execution storage rec = _executions[verdictId];
         if (rec.status != ExecStatus.UNKNOWN) revert("Already processed");
 
@@ -80,15 +93,28 @@ contract VerdictExecution {
     }
 
     /// @notice Query an execution record.
-    function getExecution(bytes32 verdictId) external view returns (
-        address market,
-        Resolution.Outcome outcome,
-        uint256 processedAt,
-        uint256 executedAt,
-        ExecStatus status,
-        string memory failureReason
-    ) {
+    function getExecution(
+        bytes32 verdictId
+    )
+        external
+        view
+        returns (
+            address market,
+            Resolution.Outcome outcome,
+            uint256 processedAt,
+            uint256 executedAt,
+            ExecStatus status,
+            string memory failureReason
+        )
+    {
         Execution storage r = _executions[verdictId];
-        return (r.market, r.outcome, r.processedAt, r.executedAt, r.status, r.failureReason);
+        return (
+            r.market,
+            r.outcome,
+            r.processedAt,
+            r.executedAt,
+            r.status,
+            r.failureReason
+        );
     }
 }

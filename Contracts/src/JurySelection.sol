@@ -7,7 +7,10 @@ pragma solidity ^0.8.20;
 contract JurySelection {
     address public owner;
 
-    enum JuryStatus { NONE, SELECTED }
+    enum JuryStatus {
+        NONE,
+        SELECTED
+    }
 
     struct JuryInfo {
         address[] members;
@@ -39,7 +42,12 @@ contract JurySelection {
     /// @param candidates  Pool of candidate addresses.
     /// @param size  Desired jury size.
     /// @param seed  Entropy seed for pseudo-random selection.
-    function selectJury(bytes32 juryId, address[] calldata candidates, uint256 size, uint256 seed) external onlyOwner {
+    function selectJury(
+        bytes32 juryId,
+        address[] calldata candidates,
+        uint256 size,
+        uint256 seed
+    ) external onlyOwner {
         require(_juries[juryId].status == JuryStatus.NONE, "Jury exists");
         require(size > 0, "Invalid size");
         require(candidates.length >= size, "Not enough candidates");
@@ -49,7 +57,11 @@ contract JurySelection {
 
         // basic Fisher-Yates shuffle using seed
         for (uint256 i = pool.length - 1; i > 0; i--) {
-            uint256 rand = uint256(keccak256(abi.encodePacked(seed, block.timestamp, block.number, i)));
+            uint256 rand = uint256(
+                keccak256(
+                    abi.encodePacked(seed, block.timestamp, block.number, i)
+                )
+            );
             uint256 j = rand % (i + 1);
             // swap
             address tmp = pool[i];
@@ -83,7 +95,10 @@ contract JurySelection {
 
     /// @notice Record participation for a jury member.
     function recordParticipation(bytes32 juryId) external {
-        require(_juries[juryId].status == JuryStatus.SELECTED, "Jury not selected");
+        require(
+            _juries[juryId].status == JuryStatus.SELECTED,
+            "Jury not selected"
+        );
         require(_isMember[juryId][msg.sender], "Not a juror");
         require(!_hasParticipated[juryId][msg.sender], "Already participated");
 
@@ -97,17 +112,25 @@ contract JurySelection {
     }
 
     /// @notice Check if address is member of a jury.
-    function isMember(bytes32 juryId, address account) external view returns (bool) {
+    function isMember(
+        bytes32 juryId,
+        address account
+    ) external view returns (bool) {
         return _isMember[juryId][account];
     }
 
     /// @notice Check if member has participated.
-    function hasParticipated(bytes32 juryId, address account) external view returns (bool) {
+    function hasParticipated(
+        bytes32 juryId,
+        address account
+    ) external view returns (bool) {
         return _hasParticipated[juryId][account];
     }
 
     /// @notice Returns jury size and status.
-    function getJuryInfo(bytes32 juryId) external view returns (uint256 size, JuryStatus status) {
+    function getJuryInfo(
+        bytes32 juryId
+    ) external view returns (uint256 size, JuryStatus status) {
         JuryInfo storage info = _juries[juryId];
         return (info.size, info.status);
     }

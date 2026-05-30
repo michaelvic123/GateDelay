@@ -17,7 +17,16 @@ contract MarketAppealTest is Test {
         vm.prank(alice);
         bytes32 id = appeal.submitAppeal(address(0x100), "ipfs://evidence");
 
-        (address market, address appellant, string memory uri, , MarketAppeal.AppealStatus status,, ,) = appeal.getAppeal(id);
+        (
+            address market,
+            address appellant,
+            string memory uri,
+            ,
+            MarketAppeal.AppealStatus status,
+            ,
+            ,
+
+        ) = appeal.getAppeal(id);
 
         assertEq(market, address(0x100));
         assertEq(appellant, alice);
@@ -33,9 +42,23 @@ contract MarketAppealTest is Test {
         appeal.startReview(id);
 
         // Decide the appeal
-        appeal.decideAppeal(id, true, "upheld", keccak256(abi.encodePacked("v1")));
+        appeal.decideAppeal(
+            id,
+            true,
+            "upheld",
+            keccak256(abi.encodePacked("v1"))
+        );
 
-        (, , , , MarketAppeal.AppealStatus status, bool accepted, string memory reason, ) = appeal.getAppeal(id);
+        (
+            ,
+            ,
+            ,
+            ,
+            MarketAppeal.AppealStatus status,
+            bool accepted,
+            string memory reason,
+
+        ) = appeal.getAppeal(id);
 
         assertEq(uint256(status), uint256(MarketAppeal.AppealStatus.DECIDED));
         assertTrue(accepted);

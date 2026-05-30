@@ -19,10 +19,15 @@ contract VerdictExecutionTest is Test {
         verdictExec = new VerdictExecution(arbitrator);
 
         // Deploy a minimal PositionToken (factory set to zero for tests)
-        pt = new PositionToken(address(0));
+        pt = new PositionToken(address(0))
 
         // Deploy Resolution with `verdictExec` as admin so it can call settleDispute
-        resolution = new Resolution(1 days, resolver, address(verdictExec), address(pt));
+        resolution = new Resolution(
+            1 days,
+            resolver,
+            address(verdictExec),
+            address(pt)
+        );
 
         // Point the execution router at the Resolution contract
         verdictExec.setResolution(address(resolution));
@@ -36,12 +41,8 @@ contract VerdictExecutionTest is Test {
         vm.prank(arbitrator);
         verdictExec.processVerdict(vid, market, Resolution.Outcome.YES);
 
-        (,
-         ,
-         ,
-         ,
-         VerdictExecution.ExecStatus status,
-         ) = verdictExec.getExecution(vid);
+        (, , , , VerdictExecution.ExecStatus status, ) = verdictExec
+            .getExecution(vid);
 
         assertEq(uint256(status), uint256(VerdictExecution.ExecStatus.FAILED));
     }
@@ -63,13 +64,12 @@ contract VerdictExecutionTest is Test {
         vm.prank(arbitrator);
         verdictExec.processVerdict(vid, market, Resolution.Outcome.NO);
 
-        (,
-         ,
-         ,
-         ,
-         VerdictExecution.ExecStatus status,
-         ) = verdictExec.getExecution(vid);
+        (, , , , VerdictExecution.ExecStatus status, ) = verdictExec
+            .getExecution(vid);
 
-        assertEq(uint256(status), uint256(VerdictExecution.ExecStatus.EXECUTED));
+        assertEq(
+            uint256(status),
+            uint256(VerdictExecution.ExecStatus.EXECUTED)
+        );
     }
 }

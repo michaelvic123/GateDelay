@@ -28,7 +28,10 @@ contract RulingTimelockTest is Test {
 
     function testScheduleAndExecute() public {
         bytes32 id = keccak256(abi.encodePacked("r1"));
-        bytes memory data = abi.encodeWithSelector(DummyTarget.doSet.selector, 42);
+        bytes memory data = abi.encodeWithSelector(
+            DummyTarget.doSet.selector,
+            42
+        );
         uint256 delay = 1 days;
 
         timelock.scheduleRuling(id, address(target), data, delay);
@@ -41,7 +44,9 @@ contract RulingTimelockTest is Test {
         vm.warp(block.timestamp + delay + 1);
         timelock.executeRuling(id);
 
-        (, , uint256 unlockTime, , , bool executed,, , ) = timelock.getRuling(id);
+        (, , uint256 unlockTime, , , bool executed, , , ) = timelock.getRuling(
+            id
+        );
         assertTrue(executed);
         assertGt(unlockTime, 0);
         assertEq(target.last(), 42);
@@ -49,7 +54,10 @@ contract RulingTimelockTest is Test {
 
     function testCancelPreventsExecution() public {
         bytes32 id = keccak256(abi.encodePacked("r2"));
-        bytes memory data = abi.encodeWithSelector(DummyTarget.doSet.selector, 7);
+        bytes memory data = abi.encodeWithSelector(
+            DummyTarget.doSet.selector,
+            7
+        );
         uint256 delay = 100;
         timelock.scheduleRuling(id, address(target), data, delay);
 
@@ -62,14 +70,26 @@ contract RulingTimelockTest is Test {
 
     function testExecutionFailureRecorded() public {
         bytes32 id = keccak256(abi.encodePacked("r3"));
-        bytes memory data = abi.encodeWithSelector(DummyTarget.willRevert.selector);
+        bytes memory data = abi.encodeWithSelector(
+            DummyTarget.willRevert.selector
+        );
         uint256 delay = 1;
         timelock.scheduleRuling(id, address(target), data, delay);
 
         vm.warp(block.timestamp + delay + 1);
         timelock.executeRuling(id);
 
-        (, , , , , bool executed, , bool failed, bytes memory failureData) = timelock.getRuling(id);
+        (
+            ,
+            ,
+            ,
+            ,
+            ,
+            bool executed,
+            ,
+            bool failed,
+            bytes memory failureData
+        ) = timelock.getRuling(id);
         assertFalse(executed);
         assertTrue(failed);
         assertTrue(failureData.length > 0);
