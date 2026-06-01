@@ -11,6 +11,7 @@ import LiquidityChart from "../../../components/chart/LiquidityChart";
 import GasEstimator, { type GasSpeed, type GasEstimate } from "../../../components/gas/GasEstimator";
 import AnalysisPanel from "../../../components/ai/AnalysisPanel";
 import MarketSentiment from "../../../components/market/MarketSentiment";
+import EventTimeline from "../../../components/market/EventTimeline";
 
 
 // Mock data — replace with real contract/API calls
@@ -130,6 +131,9 @@ export default function MarketDetailPage({ params }: { params: { id: string } })
         marketDescription={market.description}
         defaultCollapsed={false}
       />
+
+      {/* Event Timeline */}
+      <EventTimeline marketId={market.id} />
 
       {/* Trading interface + Recent trades */}
       <div className="grid sm:grid-cols-2 gap-4">        {/* Trade */}
