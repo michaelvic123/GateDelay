@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
-import { useSigner } from 'wagmi'
-import { ethers } from 'ethers'
+import { useWalletClient } from 'wagmi'
+import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers'
 import ArbitrageDisplay from './ArbitrageDisplay'
 
 function Modal({ open, onClose, onSubmit, defaultIn = '', defaultOut = '', defaultRouter = '' }: any) {
@@ -42,7 +42,20 @@ function Modal({ open, onClose, onSubmit, defaultIn = '', defaultOut = '', defau
 // and use flash swaps/atomic executions. This is a minimal example wiring to Wagmi.
 
 export default function WagmiArbitrageExecutor() {
-  const { data: signer } = useSigner()
+  const { data: walletClient } = useWalletClient()
+  
+  const signer = React.useMemo(() => {
+    if (!walletClient) return null
+    const { account, chain, transport } = walletClient
+    const network = {
+      chainId: chain.id,
+      name: chain.name,
+      ensAddress: chain.contracts?.ensRegistry?.address,
+    }
+    const provider = new BrowserProvider(transport, network)
+    return new JsonRpcSigner(provider, account.address)
+  }, [walletClient])
+
   const [modalOpen, setModalOpen] = useState(false)
   const pendingRef = useRef<any>(null)
 
@@ -58,7 +71,7 @@ export default function WagmiArbitrageExecutor() {
       // show modal and wait for user input
       pendingRef.current = { opp }
       setModalOpen(true)
-      const result = await new Promise((resolve, reject) => {
+      const result: any = await new Promise((resolve, reject) => {
         // attach resolver to ref to be called by modal submit
         ;(pendingRef as any).current.resolve = resolve
         ;(pendingRef as any).current.reject = reject
@@ -71,7 +84,7 @@ export default function WagmiArbitrageExecutor() {
 
     // Detect network and only run real on-chain flow on local networks
     const network = await signer.provider.getNetwork()
-    const chainId = network.chainId
+    const chainId = Number(network.chainId)
     const LOCAL_CHAIN_IDS = [31337, 1337, 1338]
 
     if (!LOCAL_CHAIN_IDS.includes(chainId)) {
@@ -138,7 +151,7 @@ export default function WagmiArbitrageExecutor() {
 
   return (
     <>
-      <ArbitrageDisplay onExecute={onExecute} />
+      <ArbitrageDisplay onExecute={onExecute as any} />
       <Modal open={modalOpen} onClose={handleModalClose} onSubmit={handleModalSubmit} />
     </>
   )
