@@ -45,9 +45,12 @@ export default function ProvisionForm({ poolInfo, onProvide }: Props) {
     try {
       if (onProvide) await onProvide(amount)
       else {
+        if (!walletClient) throw new Error('No signer')
+        const provider = new BrowserProvider(walletClient as any)
+        const signer = await provider.getSigner()
+        const tx = await signer.sendTransaction({ to: await signer.getAddress(), value: 0 })
         if (!signer) throw new Error('No signer')
-        const address = await signer.getAddress()
-        const tx = await signer.sendTransaction({ to: address, value: 0n })
+      
         await tx.wait()
       }
       setStatus('success')
