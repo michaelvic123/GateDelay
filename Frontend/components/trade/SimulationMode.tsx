@@ -65,7 +65,10 @@ class SimulationStore {
 
     subscribe(listener: (state: SimulationState) => void) {
         this.listeners.add(listener);
-        return () => this.listeners.delete(listener);
+        return () => {
+            this.listeners.delete(listener);
+            return;
+        };
     }
 }
 
@@ -77,7 +80,8 @@ function useSimulationState() {
     const [state, setState] = useState<SimulationState>(simulationStore.getState());
 
     useEffect(() => {
-        return simulationStore.subscribe((newState) => setState(newState));
+        const unsubscribe = simulationStore.subscribe((newState) => setState(newState));
+        return () => unsubscribe();
     }, []);
 
     return state;

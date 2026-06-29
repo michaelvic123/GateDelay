@@ -61,7 +61,10 @@ class SyncStore {
 
     subscribe(listener: (state: SyncStoreState) => void) {
         this.listeners.add(listener);
-        return () => this.listeners.delete(listener);
+        return () => {
+            this.listeners.delete(listener);
+            return;
+        };
     }
 }
 
@@ -114,7 +117,8 @@ function useSyncState() {
     const [state, setState] = useState<SyncStoreState>(syncStore.getState());
 
     useEffect(() => {
-        return syncStore.subscribe((newState) => setState(newState));
+        const unsubscribe = syncStore.subscribe((newState) => setState(newState));
+        return () => unsubscribe();
     }, []);
 
     return state;
@@ -129,7 +133,7 @@ export default function CrossDeviceSync({
     syncInterval = 30000,
 }: CrossDeviceSyncProps) {
     const { isConnected } = useAccount();
-    const [syncState] = useSyncState();
+    const syncState = useSyncState();
     const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     const isOnline = typeof window !== "undefined" ? navigator.onLine : true;
@@ -384,7 +388,7 @@ export default function CrossDeviceSync({
                             </div>
 
                             <div className="space-y-3">
-                                {syncState.conflicts.map((conflict) => (
+                                 {syncState.conflicts.map((conflict: SyncConflict) => (
                                     <div key={conflict.id} className="rounded-xl p-3 text-xs" style={{ background: "var(--card)" }}>
                                         <p className="font-semibold">Field: {conflict.field}</p>
                                         <div className="mt-2 grid grid-cols-2 gap-2">
