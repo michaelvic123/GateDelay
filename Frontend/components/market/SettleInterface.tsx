@@ -1,7 +1,8 @@
 "use client"
 
-import React, { useState } from 'react'
-import { useSigner } from 'wagmi'
+import React, { useState, useMemo } from 'react'
+import { useWalletClient } from 'wagmi'
+import { BrowserProvider, JsonRpcSigner } from 'ethers'
 
 type Market = {
   id: string
@@ -12,7 +13,20 @@ type Market = {
 }
 
 export default function SettleInterface({ market }: { market: Market }) {
-  const { data: signer } = useSigner()
+  const { data: walletClient } = useWalletClient()
+
+  const signer = useMemo(() => {
+    if (!walletClient) return null
+    const { account, chain, transport } = walletClient
+    const network = {
+      chainId: chain.id,
+      name: chain.name,
+      ensAddress: chain.contracts?.ensRegistry?.address,
+    }
+    const provider = new BrowserProvider(transport, network)
+    return new JsonRpcSigner(provider, account.address)
+  }, [walletClient])
+
   const [status, setStatus] = useState<string | null>(null)
 
   const totalPool = market.totalYesStake + market.totalNoStake
@@ -24,7 +38,8 @@ export default function SettleInterface({ market }: { market: Market }) {
     try {
       if (!signer) throw new Error('No signer')
       // For safety this is a mock on-chain action; in production call your settlement contract
-      const tx = await signer.sendTransaction({ to: signer._address || signer.getAddress(), value: 0 })
+      const address = await signer.getAddress()
+      const tx = await signer.sendTransaction({ to: address, value: 0n })
       await tx.wait()
       setStatus('success')
     } catch (e) {

@@ -1,14 +1,6 @@
-// @ts-nocheck
-/* eslint-disable */
-/**
- * WagmiArbitrageExecutor – arbitrage execution wired to the connected wallet.
- *
- * NOTE: this file intentionally suppresses type-checking (@ts-nocheck) because
- * it was authored for wagmi v1 (useSigner) and ethers v5, neither of which are
- * direct Frontend dependencies.  The runtime logic is preserved unchanged.
- */
-import React, { useState, useRef, useMemo } from 'react'
-import { useConnectorClient } from 'wagmi'
+import React, { useState, useRef, useMemo  } from 'react'
+import { useWalletClient , useConnectorClient} from 'wagmi'
+import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers'
 import ArbitrageDisplay from './ArbitrageDisplay'
 
 /** Lazily resolve ethers from the global scope or a CDN-loaded bundle. */
@@ -28,8 +20,20 @@ async function getSigner() {
 }
 
 export default function WagmiArbitrageExecutor() {
-  const { data: client } = useConnectorClient()
-  const signer = client ? { _client: client } : null  // placeholder; resolved lazily in onExecute
+  const { data: walletClient } = useWalletClient()
+  
+  const signer = React.useMemo(() => {
+    if (!walletClient) return null
+    const { account, chain, transport } = walletClient
+    const network = {
+      chainId: chain.id,
+      name: chain.name,
+      ensAddress: chain.contracts?.ensRegistry?.address,
+    }
+    const provider = new BrowserProvider(transport, network)
+    return new JsonRpcSigner(provider, account.address)
+  }, [walletClient])
+
   const [modalOpen, setModalOpen] = useState(false)
   const pendingRef = useRef<any>(null)
 
@@ -43,7 +47,7 @@ export default function WagmiArbitrageExecutor() {
       // show modal and wait for user input
       pendingRef.current = { opp }
       setModalOpen(true)
-      const result = await new Promise((resolve, reject) => {
+      const result: any = await new Promise((resolve, reject) => {
         // attach resolver to ref to be called by modal submit
         ;(pendingRef as any).current.resolve = resolve
         ;(pendingRef as any).current.reject = reject
@@ -56,7 +60,7 @@ export default function WagmiArbitrageExecutor() {
 
     // Detect network and only run real on-chain flow on local networks
     const network = await signer.provider.getNetwork()
-    const chainId = network.chainId
+    const chainId = Number(network.chainId)
     const LOCAL_CHAIN_IDS = [31337, 1337, 1338]
 
     if (!LOCAL_CHAIN_IDS.includes(chainId)) {
@@ -146,7 +150,7 @@ export default function WagmiArbitrageExecutor() {
 
   return (
     <>
-      <ArbitrageDisplay onExecute={onExecute} />
+      <ArbitrageDisplay onExecute={onExecute as any} />
       <Modal open={modalOpen} onClose={handleModalClose} onSubmit={handleModalSubmit} />
     </>
   )

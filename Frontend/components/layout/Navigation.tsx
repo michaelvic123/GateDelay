@@ -132,7 +132,7 @@ export default function Navigation() {
         {/* Desktop nav links */}
         <div className="hidden lg:flex items-center gap-1" role="list">
           {NAV_LINKS.map(({ href, label }) => {
-            const active = pathname === href || pathname.startsWith(href + "/");
+            const active = pathname ? (pathname === href || pathname.startsWith(href + "/")) : false;
             return (
               <Link
                 key={href}
@@ -256,7 +256,7 @@ export default function Navigation() {
         {/* Nav links — large touch targets */}
         <nav aria-label="Mobile navigation links">
           {NAV_LINKS.map(({ href, label }) => {
-            const active = pathname === href || pathname.startsWith(href + "/");
+            const active = pathname ? (pathname === href || pathname.startsWith(href + "/")) : false;
             return (
               <Link
                 key={href}
