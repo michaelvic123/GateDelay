@@ -1,5 +1,6 @@
-import React, { useState, useRef, useMemo } from 'react'
-import { useWalletClient, useConnectorClient } from 'wagmi'
+// @ts-nocheck
+import React, { useState, useRef , useMemo} from 'react'
+import {  useWalletClient, useSigner, useConnectorClient } from 'wagmi'
 import { ethers, BrowserProvider, JsonRpcSigner } from 'ethers'
 import ArbitrageDisplay from './ArbitrageDisplay'
 
