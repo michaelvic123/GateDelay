@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: "/governance", label: "Governance" },
   { href: "/bridge", label: "Bridge" },
   { href: "/transactions", label: "History" },
+  { href: "/audit", label: "Audit" },
   { href: "/volatility", label: "Volatility" },
   { href: "/wallet", label: "Wallet" },
   { href: "/arbitrage-demo", label: "Arbitrage" },
